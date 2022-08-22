@@ -1,0 +1,82 @@
+cabal-version:       2.4
+name:                pasta-poly
+version:             0.0.0.0
+synopsis:            haskell polynomial stuff
+description:         haskell polynomial stuff
+homepage:            https://github.com/eschorn1/pasta-poly
+bug-reports:         https://github.com/eschorn1/pasta-poly/issues
+license:             MIT
+license-file:        LICENSE
+author:              Eric Schorn
+maintainer:          Eric Schorn <eric.schorn@nccgroup.com>
+copyright:           2022 Eric Schorn
+category:            Cryptography
+build-type:          Simple
+extra-doc-files:     README.md
+                     CHANGELOG.md
+tested-with:         GHC == 8.8.3
+
+source-repository head
+  type:                git
+  location:            https://github.com/eschorn1/pasta-poly.git
+
+common common-options
+  build-depends:       base >= 4.12 && < 4.17, 
+                       pasta-curves == 0.0.0.0
+  other-modules:       Poly
+  ghc-options:         -Wall
+                       -Wcompat
+                       -Widentities
+                       -Wincomplete-uni-patterns
+                       -Wincomplete-record-updates
+  if impl(ghc >= 8.0)
+    ghc-options:       -Wredundant-constraints
+  if impl(ghc >= 8.2)
+    ghc-options:       -fhide-source-paths
+  if impl(ghc >= 8.4)
+    ghc-options:       -Wmissing-export-lists
+                       -Wpartial-fields
+  if impl(ghc >= 8.8)
+    ghc-options:       -Wmissing-deriving-strategies
+
+  default-language:    Haskell2010
+
+library
+  import:              common-options
+  hs-source-dirs:      src
+  exposed-modules:     PastaPoly
+
+executable pasta-poly
+  import:              common-options
+  hs-source-dirs:      app, src
+  main-is:             Main.hs
+  other-modules:       Poly
+  build-depends:       pasta-poly
+  ghc-options:         -threaded
+                       -rtsopts
+                       -with-rtsopts=-N
+
+test-suite pasta-poly-test
+  import:              common-options
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test, src
+  main-is:             Spec.hs
+  other-modules:       TestPoly
+  build-depends:       pasta-poly,
+                       tasty >= 1.4 && < 1.5,
+                       tasty-hunit >= 0.10 && < 0.11,
+                       tasty-quickcheck >= 0.10 && < 0.11
+  ghc-options:         -threaded
+                       -rtsopts
+                       -with-rtsopts=-N
+
+benchmark pasta-poly-benchmark
+  import:              common-options
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      benchmark, src
+  main-is:             Main.hs
+  build-depends:       gauge
+                     , pasta-poly
+  ghc-options:         -threaded
+                       -rtsopts
+                       -with-rtsopts=-N

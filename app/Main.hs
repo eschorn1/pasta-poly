@@ -1,7 +1,10 @@
 module Main (main) where
 
-import HaskPoly (someFunc)
+import PastaPoly (someFunc)
+import Poly
 
 
 main :: IO ()
-main = someFunc
+main = do
+    someFunc
+    print xx1

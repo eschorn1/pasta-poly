@@ -6,10 +6,13 @@ Maintainer: Eric Schorn <eric.schorn@nccgroup.com>
 haskell polynomial stuff
 -}
 
-module HaskPoly
+module PastaPoly
        ( someFunc
        ) where
 
+import PastaCurves
 
 someFunc :: IO ()
-someFunc = putStrLn ("someFunc" :: String)
+someFunc = do
+       print "Sample executable for pasta-curves"
+       print $ pointMul (2 ^ (200::Integer) - 1 :: Fq) (base :: Pallas)
