@@ -22,8 +22,8 @@ source-repository head
 
 common common-options
   build-depends:       base >= 4.12 && < 4.17, 
-                       pasta-curves == 0.0.0.0
-  other-modules:       Poly
+                       pasta-curves == 0.0.0.0, random, utf8-string
+  other-modules:       Poly, Commit
   ghc-options:         -Wall
                        -Wcompat
                        -Widentities

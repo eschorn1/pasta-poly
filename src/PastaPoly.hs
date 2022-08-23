@@ -7,10 +7,11 @@ haskell polynomial stuff
 -}
 
 module PastaPoly
-       ( someFunc
+       ( module PastaPoly
        ) where
 
 import PastaCurves
+import Commit
 
 someFunc :: IO ()
 someFunc = do
