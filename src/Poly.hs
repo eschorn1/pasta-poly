@@ -16,6 +16,11 @@ polyNew :: (Field a) => [a] -> Polynomial a
 polyNew x = Coefficients $ dropWhileEnd (==0) x
 
 
+-- | `polyEval` evaluates a polynomial given x (using Horner's rule)
+polyEval :: (Field a) => a -> Polynomial a -> a
+polyEval pt (Coefficients c) = foldr (\a b -> a + b * pt) 0 c 
+
+
 -- | `zipWithEqLen` zips two lists of equal length padded with "more significant 0s"
 zipWithEqLen :: (Num a, Num b) => (a -> b -> c) -> [a] -> [b] -> [c]
 zipWithEqLen fn a b = zipWith fn new_a new_b

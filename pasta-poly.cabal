@@ -50,7 +50,7 @@ executable pasta-poly
   import:              common-options
   hs-source-dirs:      app, src
   main-is:             Main.hs
-  other-modules:       Poly
+  other-modules:       PastaPoly
   build-depends:       pasta-poly
   ghc-options:         -threaded
                        -rtsopts

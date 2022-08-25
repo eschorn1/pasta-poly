@@ -1,10 +1,11 @@
 module Main (main) where
 
 import PastaPoly (someFunc)
-import Poly
+--import Poly
+import Commit
 
 
 main :: IO ()
 main = do
     someFunc
-    print xx1
+    print addHomomorphic
