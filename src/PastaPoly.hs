@@ -4,9 +4,10 @@ SPDX-License-Identifier: MIT
 Maintainer: Eric Schorn <eric.schorn@nccgroup.com>
 
 TODO
- - get it working
- - there is probably a place where i reimplemente4d mulMul --> fix
- - separate public setup state from transcript
+ - rework doc strings
+ - refine calcS for variable widths
+ - refine full protocol flow for variable widths (iterate)
+ - last few protocol steps need polish
 
 -}
 
@@ -18,13 +19,12 @@ import PastaCurves
 import System.Random.Stateful(mkStdGen, Random(randomR), RandomGen)
 import Data.List (mapAccumL)
 import Data.Tuple (swap)
-import Debug.Trace (trace)
 
 data CRS = CRS {degree:: Integer, crsG :: [Vesta], crsH :: Vesta}                                     -- set during startup
 data ProverState = ProverState {a :: [Fp], b :: [Fp], g :: [Vesta], r :: Fp, lj :: [Fp], rj :: [Fp]}  -- prover state evolves through 'dialogue'
 data TranscriptState = TranscriptState {commitment :: Vesta, x :: Fp, ev :: Fp,                       -- initialized by prover
                        u :: Vesta, p' :: Vesta, uj :: [Fp], capLj :: [Vesta], capRj :: [Vesta] }      -- evolves through 'dialogue'
--- Verifier has no state!!
+-- Verifier has no state (as it is essentially baked into the transcript)
 
 
 rndFp :: (RandomGen g) => g -> (g, Fp)
@@ -88,7 +88,7 @@ prover1 rndGen CRS{..} prover transcript = (r2, prover {lj=lj prover ++ [l0], rj
     (a'hi, a'lo) = getHiLo $ a prover
     (b'hi, b'lo) = getHiLo $ b prover
     (g'hi, g'lo) = getHiLo $ g prover
-    (r1, l0) = rndFp rndGen  -- <<--- HANG ON, WE NEVER SAVE L0 AND R0; GONNA HAVE TO WIRE IN PROVER STATE OUTPUT!
+    (r1, l0) = rndFp rndGen
     (r2, r0) = rndFp r1
     tLj = mulMul a'lo g'hi `pointAdd` pointMul l0 crsH `pointAdd` pointMul (inProd a'lo b'hi) (u transcript)
     tRj = mulMul a'hi g'lo `pointAdd` pointMul r0 crsH `pointAdd` pointMul (inProd a'hi b'lo) (u transcript)
@@ -128,7 +128,7 @@ prover3 prover transcript = nextProver
 calcS :: [Fp] -> [Fp] -- 3 into 8
 calcS u = result
   where
-    result = [c * b * a | a <- [inv0 $ u !! 2, u !! 2], b <- [inv0 $ u !! 1,u !! 1], c <- [inv0 $ head u,head u]]
+    result = [c * b * a | a <- [inv0 $ u !! 2, u !! 2], b <- [inv0 $ u !! 1, u !! 1], c <- [inv0 $ head u, head u]]
 
 
 verNext :: TranscriptState -> Vesta
@@ -156,18 +156,20 @@ prvLast CRS{..} ProverState{..} transcript r' = result
 test :: Bool
 test = result
   where
-    (r1, crs) = setup (mkStdGen 1) 8                          -- crs = (8-vector of g, h)
+    (r1, crs) = setup (mkStdGen 1) 8                                             -- crs = (8-vector of g, h)
     (r2, proverState0, transcript1) = prover0 r1 crs
     (r3, transcript2) = verifier0 r2 transcript1
-    (r4, proverState1, transcript3) = prover1 r3 crs proverState0 transcript2                -- now 8 wide
+    (r4, proverState1, transcript3) = prover1 r3 crs proverState0 transcript2    -- now 8 wide
     (r5, transcript4) = verifier1 r4 transcript3
-    (r6, proverState2, transcript5) = prover2 r5 crs proverState1 transcript4  -- now 4 wide
+    (r6, proverState2, transcript5) = prover2 r5 crs proverState1 transcript4    -- now 4 wide
     (r7, transcript6) = verifier1 r6 transcript5
-    (r8, proverState3, transcript7)  = prover2 r7 crs proverState2 transcript6  -- now 2 wide
+    (r8, proverState3, transcript7)  = prover2 r7 crs proverState2 transcript6   -- now 2 wide
     (_r9, transcript8) = verifier1 r8 transcript7
-    proverState4 = prover3 proverState3 transcript8  -- now 1 wide
-    s = calcS $ uj transcript8
+    proverState4 = prover3 proverState3 transcript8                              -- now 1 wide
+    s = calcS $ reverse (uj transcript8)  -- TODO reverse
+    sg = mulMul s $ crsG crs
+    sb = inProd s (b proverState0)
     qVer = verNext transcript8
     r' = prvNext proverState4 transcript8
     qPrv = prvLast crs proverState4 transcript8 r'
-    result =  qVer == qPrv --mulMul s (fst $ crs transcript8) == head ( fst (crs transcript8)) --    u transcript9 == u transcript1 -- = qVer == qPrv
+    result = qVer == qPrv && (sb == head (b proverState4)) && (sg == head (g proverState4)) 
