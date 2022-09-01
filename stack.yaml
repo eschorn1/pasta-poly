@@ -1,6 +1,6 @@
 resolver: lts-19.19
 
 extra-deps:
-- pasta-curves-0.0.0.0@sha256:f9a95817e1d69b65a338461b47909b2299feadabf4414b9a06fa5ea3d97293af,3010
+- pasta-curves-0.0.1.0@sha256:cc0609bdfd75885c6b4bb35de95b642175961434f40799158dd63185c444d355,3057
 
 system-ghc: true
