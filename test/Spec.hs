@@ -6,6 +6,6 @@ import TestPoly
 
 main :: IO ()
 main = do
-  setEnv "TASTY_QUICKCHECK_TESTS" "1_000"
-  defaultMain $ testGroup "\nRunning Tests" [firstPoly]
+  setEnv "TASTY_QUICKCHECK_TESTS" "1_000_000"
+  defaultMain $ testGroup "\nRunning Tests" [firstPoly, firstPoly2]
   print "Finished!"

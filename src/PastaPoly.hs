@@ -22,6 +22,8 @@ import PastaCurves
 import System.Random.Stateful(mkStdGen, RandomGen)
 import Data.List (mapAccumL)
 import Data.Tuple (swap)
+import Fft
+import Poly
 
 
 -- |  `CRS` is set once during initialization and remains stable
@@ -92,7 +94,7 @@ prover1 rndGen CRS{..} prover transcript = (r2,
   prover {lj=lj prover ++ [ljj], rj=rj prover ++ [rjj]},
   transcript {capLj=capLj transcript ++ [capLjj], capRj=capRj transcript ++ [capRjj]})
   where
-    (a'hi, a'lo) = getHiLo $ a prover
+    (a'hi, a'lo) = getHiLo (a prover)
     (b'hi, b'lo) = getHiLo $ b prover
     (g'hi, g'lo) = getHiLo $ g prover
     (r1, ljj) = rndF rndGen

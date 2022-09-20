@@ -4,13 +4,14 @@
 {-# OPTIONS_GHC -Wno-orphans -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Redundant bracket" #-}
 
-module TestPoly (firstPoly) where
+module TestPoly (firstPoly, firstPoly2) where
 
 import Prelude hiding (sqrt, quot, rem)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.QuickCheck
 import PastaCurves
 import Poly
+import Fft
 
 instance Arbitrary Fp where
   arbitrary = fromInteger <$> choose (0, 2 ^ (512::Integer))
@@ -20,7 +21,7 @@ instance Arbitrary Fq where
 
 instance Arbitrary (Polynomial Fp) where
   arbitrary = do
-    lll <- listOf1 arbitrary
+    lll <- vectorOf 8 arbitrary
     return $ Coefficients lll
 
 firstPoly :: TestTree
@@ -43,3 +44,13 @@ div3 a b c = (quot, rem)
     r2 = polyAdd r_ac r_bc
     (q_r2, rem) = polyDiv r2 c
     quot = polyAdd (polyAdd q_ac q_bc) q_r2
+
+
+
+firstPoly2 :: TestTree
+firstPoly2 = testGroup "Testing first poly2 via QuickCheck" [
+  testProperty "test no FFT"  $ \a b -> gimme16Samples (polyMul a b) getDomain ==
+                                 mul16 (gimme16Samples a getDomain) (gimme16Samples b getDomain),
+  testProperty "test FFT"  $ \a b -> polyMul a b ==
+                                 polyNew (ifft2 (mul16 (gimme16Samples a getDomain) (gimme16Samples b getDomain)) getDomain)
+  ]
