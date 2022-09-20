@@ -21,7 +21,8 @@ instance Arbitrary Fq where
 
 instance Arbitrary (Polynomial Fp) where
   arbitrary = do
-    lll <- vectorOf 8 arbitrary
+    vecLen <- choose (1, 8)
+    lll <- vectorOf vecLen arbitrary
     return $ Coefficients lll
 
 firstPoly :: TestTree

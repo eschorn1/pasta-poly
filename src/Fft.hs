@@ -95,9 +95,7 @@ checkMe a b = (polyMul a b,
 {-
 
 TO DO
- -- read; understand why right side of dd is don't-care
- -- get it working for an example Fp; what is correct domain (a list comprehension)
- -- get a quickcheck test working
+ -- implement poly as samples
  -- see https://crypto.stackexchange.com/questions/63614/finding-the-n-th-root-of-unity-in-a-finite-field
 
 so Fermat says a^{p-1} = 1 mod p
